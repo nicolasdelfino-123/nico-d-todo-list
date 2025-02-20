@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 
 const Todo = () => {
-  const [borrar, setBorrar] = useState("");
   const [agregarItem, setAgregarItem] = useState([]);
 
   function handlerInput(e) {
@@ -11,17 +10,16 @@ const Todo = () => {
     }
   }
 
-  function borrarItem(e) {
-    if (e.target.value == borrar) {
-      setBorrar(agregarItem.pop);
-    }
+  function borrarItem(index) {
+    let newArray = agregarItem.filter((_, idx) => index !== idx);
+    setAgregarItem(newArray);
   }
 
   const mapeo = agregarItem.map((valor, index) => {
     return (
-      <li key={index} value={valor}>
-        {agregarItem}{" "}
-        <button value={index} onClick={borrarItem}>
+      <li key={valor} value={index}>
+        {valor}{" "}
+        <button className="boton" value={index} onClick={borrarItem}>
           X
         </button>
       </li>
