@@ -1,17 +1,89 @@
-.itemsLeft {
-  padding: 1vh;
-  font-size: 2.5vh;
+.text-center {
+  background-color: rgb(237, 225, 225);
+  height: 100vh;
+}
+
+.fs-smaller {
+  font-size: 0.8rem;
 }
 
 .listaItems {
   display: flex;
+  justify-content: space-between;
 }
 
 .botonBorrar {
   margin-left: auto;
   opacity: 0;
+  border: none;
+  background: none;
 }
 
 .listaItems:hover .botonBorrar {
   opacity: 1;
+}
+
+.cardInput {
+  width: 100%; /* Asegura que el contenedor ocupe todo el ancho disponible */
+  height: 100%; /* Asegura que el contenedor ocupe todo el alto disponible */
+  padding: 0; /* Elimina cualquier padding adicional */
+  margin: 0; /* Elimina márgenes adicionales si los hay */
+}
+
+.input {
+  width: 100%; /* El input ocupará todo el ancho del contenedor */
+  height: 100%; /* El input ocupará todo el alto del contenedor */
+  border: none; /* Elimina el borde predeterminado del input */
+  outline: none; /* Elimina el borde que aparece cuando se hace clic (outline) */
+  box-sizing: border-box; /* Asegura que el padding no afecte el tamaño del input */
+  padding: 10px; /* Elimina cualquier padding dentro del input */
+}
+
+h1 {
+  font-weight: 100;
+}
+
+/* a partir de acá pedí ayuda para hacer la parte inferiror como si hubieran más tarjetas pero no lo logré, solo logré sombra, y pedí a la IA el codigo comentado para poder repasarlo y aprenderlo */
+
+/* .tarjeta - Estilos principales de la tarjeta */
+.tarjeta {
+  position: relative; /* Hace que el contenedor de la tarjeta sea un contenedor posicionado para poder usar el pseudo-elemento :after */
+
+  /* box-shadow: Crea las sombras alrededor de la tarjeta */
+  box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.1),
+    /* Sombra ligera en la parte superior */ 0px 16px 25px rgba(0, 0, 0, 0.15),
+    /* Sombra intermedia */ 0px 24px 35px rgba(0, 0, 0, 0.2); /* Sombra más profunda, crea un efecto de profundidad */
+
+  border: 1px solid rgba(0, 0, 0, 0.1); /* Agrega un borde sutil de 1px con un color muy transparente */
+
+  border-radius: 5px; /* Redondea las esquinas de la tarjeta (puedes ajustarlo para hacer más o menos redondeadas las esquinas) */
+}
+
+/* .tarjeta:after - Crea el efecto de sombra extra en la parte inferior de la tarjeta */
+.tarjeta:after {
+  content: ""; /* Necesario para que el pseudo-elemento :after se cree, pero no le da contenido */
+
+  position: absolute; /* Posiciona el pseudo-elemento de forma absoluta respecto al contenedor de la tarjeta */
+
+  bottom: -8px; /* Desplaza la sombra hacia abajo, para que sobresalga por debajo de la tarjeta */
+
+  left: 0; /* Alinea la sombra a la izquierda del contenedor */
+
+  width: 100%; /* Hace que el pseudo-elemento ocupe todo el ancho de la tarjeta */
+
+  height: 6px; /* Define la altura de la "sombra" inferior, es como el grosor de la línea de sombra */
+
+  /* background: Crea un fondo de gradiente que simula sombras de diferentes intensidades */
+  background: linear-gradient(
+    to right,
+    /* Hace que el gradiente se aplique de izquierda a derecha */
+      rgba(0, 0, 0, 0.1) 0%,
+    /* Sombras suaves en el comienzo */ rgba(0, 0, 0, 0.2) 33%,
+    /* Sombra un poco más oscura a 33% de la extensión */ rgba(0, 0, 0, 0.3) 66%,
+    /* Sombra más oscura a 66% de la extensión */ rgba(0, 0, 0, 0.4) 100%
+      /* Sombra más profunda al final */
+  );
+
+  /* border-radius: redondea las esquinas inferiores de la sombra para que sigan el redondeo de la tarjeta */
+  border-radius: 0 0 10px 10px; /* Solo aplica redondeo a las esquinas inferiores */
 }

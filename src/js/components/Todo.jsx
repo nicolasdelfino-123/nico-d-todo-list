@@ -36,7 +36,7 @@ const Todo = () => {
         >
           {valor}{" "}
           <button className="botonBorrar" onClick={() => borrarItem(index)}>
-            <i className="fa fa-times"></i>
+            <i className="fa-solid fa-x"></i>
           </button>
         </li>
       </div>
@@ -44,11 +44,11 @@ const Todo = () => {
   });
 
   return (
-    <div className="container w-50">
+    <div className="container h-100 w-50">
       <h1>todos</h1>
       <div>
         <div className="card w-100 mb-0">
-          <div className="card-body">
+          <div className="cardInput card-body">
             <input
               className="input list-group-item w-100 h-290"
               onKeyDown={handlerInput}
@@ -58,8 +58,9 @@ const Todo = () => {
           </div>
         </div>
         <ul className="list-group">{mapeo}</ul>
-        <div className="card">
-          <div className="itemsLeft card-body">{itemsLeft()}</div>
+
+        <div className="tarjeta card w-100">
+          <div className="list-group-item fs-smaller ps-2">{itemsLeft()}</div>
         </div>
       </div>
     </div>
