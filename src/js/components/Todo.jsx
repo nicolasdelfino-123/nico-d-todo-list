@@ -1,9 +1,29 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "font-awesome/css/font-awesome.min.css";
 
 const Todo = () => {
   const [agregarItem, setAgregarItem] = useState([]);
+  const [todos, setTodos] = useState([]);
 
+  useEffect(() => {
+    const handlerUser = async () => {
+      const userName = "Nico";
+      try {
+        const response = await fetch(
+          `https://playground.4geeks.com/todo/users/${userName}`
+        );
+        if (!response.ok) {
+          throw new Error("algo salió mal: ", response.statusText);
+        }
+        let data = await response.json();
+        console.log("aca está la datita: ", data);
+      } catch (error) {
+        console.log("el error es: ", error);
+      }
+    };
+
+    handlerUser();
+  }, []);
   function handlerInput(e) {
     if (e.key === "Enter") {
       setAgregarItem([...agregarItem, e.target.value]);
@@ -25,6 +45,36 @@ const Todo = () => {
       >{`${totalItems} item${totalItems !== 1 ? "s" : ""} left`}</li>
     );
   }
+  // Función para agregar tarea tanto localmente como en la API
+  const agregarTodo = async (item) => {
+    // Actualizar el estado local primero
+    setAgregarItem([...agregarItem, item]);
+
+    try {
+      const response = await fetch(
+        `https://playground.4geeks.com/todo/todos/${userName}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            label: item,
+            is_done: false,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Error al agregar el todo");
+      }
+
+      const data = await response.json();
+      console.log("Todo agregado: ", data);
+    } catch (error) {
+      console.error("Error en agregar todo: ", error);
+    }
+  };
 
   const mapeo = agregarItem.map((valor, index) => {
     return (
@@ -34,7 +84,7 @@ const Todo = () => {
           key={index}
           data-valor={valor}
         >
-          {valor}{" "}
+          {valor}
           <button className="botonBorrar" onClick={() => borrarItem(index)}>
             <i className="fa-solid fa-x"></i>
           </button>
