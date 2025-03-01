@@ -4,26 +4,50 @@ import "font-awesome/css/font-awesome.min.css";
 const Todo = () => {
   const [agregarItem, setAgregarItem] = useState([]);
   const [todos, setTodos] = useState([]);
-
+  const userName = "Niasdf34";
   useEffect(() => {
     const handlerUser = async () => {
-      const userName = "Nico";
+      // El nombre del usuario que quieres crear
+
       try {
-        const response = await fetch(
+        // Verificar si el usuario ya existe antes de intentar crearlo
+        const responseCheck = await fetch(
           `https://playground.4geeks.com/todo/users/${userName}`
         );
-        if (!response.ok) {
-          throw new Error("algo salió mal: ", response.statusText);
+
+        if (responseCheck.ok) {
+          console.log("El usuario ya existe.");
+          return; // Si el usuario ya existe, no hacemos el POST.
         }
-        let data = await response.json();
-        console.log("aca está la datita: ", data);
+
+        // Si el usuario no existe, crear uno nuevo
+        const responseCreate = await fetch(
+          `https://playground.4geeks.com/todo/users/${userName}`,
+          {
+            method: "POST", // Usamos POST para crear el usuario
+            headers: {
+              "Content-Type": "application/json", // Indicar que enviamos datos en formato JSON
+            },
+            body: JSON.stringify({
+              name: userName, // Pasar el nombre del usuario en el body
+            }),
+          }
+        );
+
+        if (!responseCreate.ok) {
+          throw new Error("Algo salió mal: " + responseCreate.statusText);
+        }
+
+        const data = await responseCreate.json(); // Obtener la respuesta en formato JSON
+        console.log("Usuario creado: ", data.name); // Verificar los datos del usuario creado
       } catch (error) {
-        console.log("el error es: ", error);
+        console.log("El error es: ", error);
       }
     };
 
-    handlerUser();
-  }, []);
+    handlerUser(); // Llamar a la función para crear el usuario
+  }, []); // Este useEffect solo se ejecuta al montar el componente
+
   function handlerInput(e) {
     if (e.key === "Enter") {
       setAgregarItem([...agregarItem, e.target.value]);
@@ -45,36 +69,44 @@ const Todo = () => {
       >{`${totalItems} item${totalItems !== 1 ? "s" : ""} left`}</li>
     );
   }
+
+  /* haciendo esto */
+
   // Función para agregar tarea tanto localmente como en la API
-  const agregarTodo = async (item) => {
-    // Actualizar el estado local primero
-    setAgregarItem([...agregarItem, item]);
 
-    try {
-      const response = await fetch(
-        `https://playground.4geeks.com/todo/todos/${userName}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            label: item,
-            is_done: false,
-          }),
+  useEffect(() => {
+    const agregarTodo = async () => {
+      // Actualizar el estado local primero
+      setAgregarItem([...agregarItem]);
+
+      try {
+        const response = await fetch(
+          `https://playground.4geeks.com/todo/todos/${userName}`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              label: "",
+              is_done: false,
+            }),
+          }
+        );
+        /* console.log("se creo", body.label); */
+        if (!response.ok) {
+          throw new Error("Error al agregar el todo");
         }
-      );
 
-      if (!response.ok) {
-        throw new Error("Error al agregar el todo");
+        const data = await response.json();
+        console.log("Todo agregado: ", data);
+      } catch (error) {
+        console.error("Error en agregar todo: ", error);
       }
+    };
 
-      const data = await response.json();
-      console.log("Todo agregado: ", data);
-    } catch (error) {
-      console.error("Error en agregar todo: ", error);
-    }
-  };
+    agregarTodo();
+  }, []);
 
   const mapeo = agregarItem.map((valor, index) => {
     return (
