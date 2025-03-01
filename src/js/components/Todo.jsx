@@ -3,130 +3,75 @@ import "font-awesome/css/font-awesome.min.css";
 
 const Todo = () => {
   const [agregarItem, setAgregarItem] = useState([]);
-  const [todos, setTodos] = useState([]);
-  const userName = "Niasdf34";
-  useEffect(() => {
-    const handlerUser = async () => {
-      // El nombre del usuario que quieres crear
+  const userName = "Nicolas Delfino";
 
+  // 🔹 Obtener las tareas desde la API
+  useEffect(() => {
+    const fetchTodos = async () => {
       try {
-        // Verificar si el usuario ya existe antes de intentar crearlo
-        const responseCheck = await fetch(
+        const response = await fetch(
           `https://playground.4geeks.com/todo/users/${userName}`
         );
 
-        if (responseCheck.ok) {
-          console.log("El usuario ya existe.");
-          return; // Si el usuario ya existe, no hacemos el POST.
-        }
-
-        // Si el usuario no existe, crear uno nuevo
-        const responseCreate = await fetch(
-          `https://playground.4geeks.com/todo/users/${userName}`,
-          {
-            method: "POST", // Usamos POST para crear el usuario
-            headers: {
-              "Content-Type": "application/json", // Indicar que enviamos datos en formato JSON
-            },
-            body: JSON.stringify({
-              name: userName, // Pasar el nombre del usuario en el body
-            }),
-          }
+        if (!response.ok) throw new Error("Error al obtener los todos");
+        const data = await response.json();
+        console.log("Datos recibidos de la API:", data);
+        setAgregarItem(
+          data.todos.filter((todo) => todo.label.trim() !== "") || [] // || [] eso se llama fallback asegura que no haya datos vacíos (es decir, un array vacío o undefined), entonces se asegura de que el valor sea un array vacío [].
         );
-
-        if (!responseCreate.ok) {
-          throw new Error("Algo salió mal: " + responseCreate.statusText);
-        }
-
-        const data = await responseCreate.json(); // Obtener la respuesta en formato JSON
-        console.log("Usuario creado: ", data.name); // Verificar los datos del usuario creado
       } catch (error) {
-        console.log("El error es: ", error);
+        console.error("Error al cargar todos:", error);
       }
     };
 
-    handlerUser(); // Llamar a la función para crear el usuario
-  }, []); // Este useEffect solo se ejecuta al montar el componente
+    fetchTodos();
+  }, []); // Se ejecuta solo cuando el componente se monta
 
-  function handlerInput(e) {
-    if (e.key === "Enter") {
-      setAgregarItem([...agregarItem, e.target.value]);
-      e.target.value = "";
-    }
-  }
-
-  function borrarItem(index) {
-    let newArray = agregarItem.filter((_, indx) => indx !== index);
-    setAgregarItem(newArray);
-  }
-
-  function itemsLeft() {
-    let totalItems = agregarItem.length;
-    return (
-      <li
-        className="list-unstyled"
-        style={{ textAlign: "left" }}
-      >{`${totalItems} item${totalItems !== 1 ? "s" : ""} left`}</li>
-    );
-  }
-
-  /* haciendo esto */
-
-  // Función para agregar tarea tanto localmente como en la API
-
-  useEffect(() => {
-    const agregarTodo = async () => {
-      // Actualizar el estado local primero
-      setAgregarItem([...agregarItem]);
+  // 🔹 Agregar nueva tarea
+  const handlerInput = async (e) => {
+    if (e.key === "Enter" && e.target.value.trim() !== "") {
+      const nuevaTarea = { label: e.target.value, is_done: false };
 
       try {
         const response = await fetch(
           `https://playground.4geeks.com/todo/todos/${userName}`,
           {
             method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              label: "",
-              is_done: false,
-            }),
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(nuevaTarea),
           }
         );
-        /* console.log("se creo", body.label); */
-        if (!response.ok) {
-          throw new Error("Error al agregar el todo");
-        }
+
+        if (!response.ok) throw new Error("Error al agregar la tarea");
 
         const data = await response.json();
-        console.log("Todo agregado: ", data);
+        setAgregarItem([data, ...agregarItem]); // Agregar la nueva tarea al estado
+
+        e.target.value = ""; // Limpiar el input
       } catch (error) {
-        console.error("Error en agregar todo: ", error);
+        console.error("Error al agregar tarea:", error);
       }
-    };
+    }
+  };
 
-    agregarTodo();
-  }, []);
+  // 🔹 Eliminar tarea por ID
+  const deleteTodo = async (id) => {
+    try {
+      const response = await fetch(
+        `https://playground.4geeks.com/todo/todos/${id}`,
+        { method: "DELETE" }
+      );
 
-  const mapeo = agregarItem.map((valor, index) => {
-    return (
-      <div className="card">
-        <li
-          className="listaItems list-group-item"
-          key={index}
-          data-valor={valor}
-        >
-          {valor}
-          <button className="botonBorrar" onClick={() => borrarItem(index)}>
-            <i className="fa-solid fa-x"></i>
-          </button>
-        </li>
-      </div>
-    );
-  });
+      if (!response.ok) throw new Error("Error al eliminar la tarea");
+
+      setAgregarItem(agregarItem.filter((todo) => todo.id !== id)); // Actualizar estado
+    } catch (error) {
+      console.error("Error al eliminar tarea:", error);
+    }
+  };
 
   return (
-    <div className="container h-100 w-50">
+    <div className="container h-100 w-50 text-center">
       <h1>todos</h1>
       <div>
         <div className="card w-100 mb-0">
@@ -139,10 +84,27 @@ const Todo = () => {
             />
           </div>
         </div>
-        <ul className="list-group">{mapeo}</ul>
+
+        <ul className="list-group">
+          {agregarItem.map((todo) => (
+            <li key={todo.id} className="list-group-item listaItems">
+              <span>{todo.label}</span>
+              <button
+                className="botonBorrar"
+                onClick={() => deleteTodo(todo.id)}
+              >
+                <i className="fa-solid fa-x"></i>
+              </button>
+            </li>
+          ))}
+        </ul>
 
         <div className="tarjeta card w-100">
-          <div className="list-group-item fs-smaller ps-2">{itemsLeft()}</div>
+          <div className="list-group-item fs-smaller text-start ps-2">
+            {`${agregarItem.length} item${
+              agregarItem.length !== 1 ? "s" : ""
+            } left`}
+          </div>
         </div>
       </div>
     </div>
