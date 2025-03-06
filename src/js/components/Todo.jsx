@@ -3,50 +3,71 @@ import "font-awesome/css/font-awesome.min.css";
 
 const Todo = () => {
   const [agregarItem, setAgregarItem] = useState([]);
-  const userName = "Nicolas Delfino";
+  const apiUrl = "https://playground.4geeks.com/todo";
+  const userName = "Nicodelfi";
+
+  // 🔹 Crear usuario
+  const createUser = async () => {
+    try {
+      console.log("creando usuario...");
+      const response = await fetch(`${apiUrl}/users/${userName}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ name: userName }), // Solo enviar el nombre
+      });
+      if (!response.ok) throw new Error("Error al crear el usuario");
+      const data = await response.json();
+      console.log("Usuario creado con éxito:", data);
+    } catch (error) {
+      console.error("Error al crear usuario:", error);
+    }
+  };
 
   // 🔹 Obtener las tareas desde la API
-  useEffect(() => {
-    const fetchTodos = async () => {
-      try {
-        const response = await fetch(
-          `https://playground.4geeks.com/todo/users/${userName}`
-        );
-
-        if (!response.ok) throw new Error("Error al obtener los todos");
-        const data = await response.json();
-        console.log("Datos recibidos de la API:", data);
-        setAgregarItem(
-          data.todos.filter((todo) => todo.label.trim() !== "") || [] // || [] eso se llama fallback asegura que no haya datos vacíos (es decir, un array vacío o undefined), entonces se asegura de que el valor sea un array vacío [].
-        );
-      } catch (error) {
-        console.error("Error al cargar todos:", error);
+  const fetchTodos = async () => {
+    try {
+      console.log("obteniendo tareas...");
+      const response = await fetch(`${apiUrl}/users/${userName}`); // Usar el endpoint correcto
+      if (response.status === 404) {
+        console.log("Usuario no encontrado. Creando usuario...");
+        await createUser(); // Si el usuario no existe, créalo
+        return;
       }
-    };
+      if (!response.ok) throw new Error("Error al obtener los todos");
+      const data = await response.json();
+      console.log("Tareas obtenidas con éxito:", data.todos);
+      setAgregarItem(data.todos || []); // Actualizar el estado con las tareas
+    } catch (error) {
+      console.error("Error al cargar todos:", error);
+    }
+  };
 
+  // 🔹 Cargar tareas al montar el componente
+  useEffect(() => {
+    console.log("Cargando tareas al montar el componente...");
     fetchTodos();
-  }, []); // Se ejecuta solo cuando el componente se monta
+  }, []);
 
   // 🔹 Agregar nueva tarea
   const handlerInput = async (e) => {
     if (e.key === "Enter" && e.target.value.trim() !== "") {
       const nuevaTarea = { label: e.target.value, is_done: false };
+      console.log("Agregando nueva tarea:", nuevaTarea);
 
       try {
-        const response = await fetch(
-          `https://playground.4geeks.com/todo/todos/${userName}`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(nuevaTarea),
-          }
-        );
+        const response = await fetch(`${apiUrl}/todos/${userName}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(nuevaTarea), // Enviar solo la nueva tarea
+        });
 
         if (!response.ok) throw new Error("Error al agregar la tarea");
 
         const data = await response.json();
+        console.log("Tarea agregada con éxito:", data);
         setAgregarItem([data, ...agregarItem]); // Agregar la nueva tarea al estado
-
         e.target.value = ""; // Limpiar el input
       } catch (error) {
         console.error("Error al agregar tarea:", error);
@@ -56,13 +77,14 @@ const Todo = () => {
 
   // 🔹 Eliminar tarea por ID
   const deleteTodo = async (id) => {
+    console.log("Eliminando tarea con ID:", id);
     try {
-      const response = await fetch(
-        `https://playground.4geeks.com/todo/todos/${id}`,
-        { method: "DELETE" }
-      );
+      const response = await fetch(`${apiUrl}/todos/${id}`, {
+        method: "DELETE",
+      });
 
       if (!response.ok) throw new Error("Error al eliminar la tarea");
+      console.log("Tarea eliminada con éxito");
 
       setAgregarItem(agregarItem.filter((todo) => todo.id !== id)); // Actualizar estado
     } catch (error) {
